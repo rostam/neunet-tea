@@ -32,3 +32,23 @@ plt.imshow(image_array, cmap="Greys", interpolation='None')
 plt.show()
 res = n.query((np.asfarray(all_values[1:])/255.0*0.99) + 0.01)
 print(res)
+
+scores = []
+for record in test_data_list:
+    all_values = record.split(",")
+    correct_label = int(all_values[0])
+    print(correct_label, "correct label ")
+    inputs = (np.asfarray(all_values[1:])/255.0*0.99)+0.01
+    outputs = n.query(inputs)
+    label = np.argmax(outputs)
+    print(label, "network's answer")
+    if label == correct_label:
+        scores.append(1)
+    else:
+        scores.append(0)
+    pass
+
+print(scores)
+scores = np.asarray(scores)
+performance = scores.sum() / scores.size
+print(performance)
