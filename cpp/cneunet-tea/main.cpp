@@ -60,16 +60,18 @@ int main() {
     cerr << min_price << " " << max_price << endl;
     mat.col(3) -= min_price * Eigen::VectorXd::Ones(mat.rows());
     double d = max_price - min_price;
-    mat.col(3) /= d;
-    cerr << meanValue << " " << standard_deviation;
-    return 0;
+    mat.col(3) /= d;;
 
-    Eigen::MatrixXd X(5, 4);
-    X << 1.4, -1, 0.4, 1,
-         0.4, -1, 0.1, 1,
-         5.4, -1, 4,   1,
-         1.5, -1, 1,   1,
-         1.8,  1, 1,   1;//last column for bias
+    Eigen::MatrixXd X(9061, 4);
+    X.col(0) = mat.col(0);
+    X.col(1) = mat.col(1);
+    X.col(2) = mat.col(2);
+    X.col(3) = Eigen::VectorXd::Ones(mat.rows());
+//    X << 1.4, -1, 0.4, 1,
+//         0.4, -1, 0.1, 1,
+//         5.4, -1, 4,   1,
+//         1.5, -1, 1,   1,
+//         1.8,  1, 1,   1;//last column for bias
 
     Eigen::MatrixXd W1(4,3);
     W1 << 0.01, 0.05, 0.07,
@@ -110,12 +112,8 @@ int main() {
     Eigen::MatrixXd Z4  = a3*W3;
     Eigen::MatrixXd a4 = Z4.unaryExpr([&](double d) {return tanh(d);});
 
-
-    double error = 0;
-//    for(int i=0;i < X.rows();i++)
-//        error += (X.row(i) - a4).squaredNorm();
-//    error = (X.row(0).transpose() - a4).squaredNorm();
-//    cout << X.row(0).transpose() << endl << a4 << endl;
+    double error = (mat.col(3) - a4).squaredNorm()/2;
+//    cerr << mat.col(3) << "then" << a4 << endl;
     cout << error;
     return 0;
 
