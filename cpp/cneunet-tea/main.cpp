@@ -3,6 +3,8 @@
 #include <fstream>
 #include "Eigen/Dense"
 #include <cmath>
+#include <sstream>
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
@@ -18,10 +20,49 @@ int main() {
      * Age: quantitative, number between 0 and 40.
      * Price: quantitative, number between 0 and 40k.
      */
-//    std::getline(file, str);
-//    while (std::getline(file, str)) {
-//        cout << str << endl;
-//    }
+    Eigen::MatrixXd mat(9061, 4);
+     int numOfLines = 0;
+    std::string line;
+    int cnt = 0;
+    while (file >> line)
+    {
+        std::replace( line.begin(), line.end(), ',', ' ');
+        stringstream ss(line);
+        int km, age, price;
+        string fuel;
+        ss >> km >> fuel >> age >> price;
+        int fuel_i = (fuel == "Diesel") ? -1 : 1;
+        if(price > 1000) {
+            if(fuel == "Diesel" || fuel == "Essence") {
+//                cerr << cnt;
+            mat.row(cnt) = Eigen::Vector4d(km, fuel_i, age, price).transpose();
+                cnt++;
+            }
+        }
+    }
+
+    //normalize number of kilometers (km)
+    double meanValue = mat.col(0).mean();
+    mat.col(0) -= meanValue*Eigen::VectorXd::Ones(mat.rows());
+    double standard_deviation = sqrt((mat.col(0).transpose()*mat.col(0)).sum()/(mat.rows()-1));
+    mat.col(0) /= standard_deviation;
+    cerr << meanValue << "  " << standard_deviation << endl;
+
+    //normalize age
+    meanValue = mat.col(2).mean();
+    mat.col(2) -= meanValue*Eigen::VectorXd::Ones(mat.rows());
+    standard_deviation = sqrt((mat.col(2).transpose()*mat.col(2)).sum()/(mat.rows()-1));
+    mat.col(2) /= standard_deviation;
+
+    //normalize price
+    double min_price = mat.col(3).minCoeff();
+    double max_price = mat.col(3).maxCoeff();
+    cerr << min_price << " " << max_price << endl;
+    mat.col(3) -= min_price * Eigen::VectorXd::Ones(mat.rows());
+    double d = max_price - min_price;
+    mat.col(3) /= d;
+    cerr << meanValue << " " << standard_deviation;
+    return 0;
 
     Eigen::MatrixXd X(5, 4);
     X << 1.4, -1, 0.4, 1,
@@ -74,7 +115,7 @@ int main() {
 //    for(int i=0;i < X.rows();i++)
 //        error += (X.row(i) - a4).squaredNorm();
 //    error = (X.row(0).transpose() - a4).squaredNorm();
-    cout << X.row(0).transpose() << endl << a4 << endl;
+//    cout << X.row(0).transpose() << endl << a4 << endl;
     cout << error;
     return 0;
 
